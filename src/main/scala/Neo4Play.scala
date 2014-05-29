@@ -45,14 +45,28 @@ object Neo4Play extends NeoService{
     (json \ "data").as[List[List[String]]]
   }
 
-  def neoJsonToDataMap(json:JsValue):List[Map[String,String]] = {
+  def neoJsonToMappedDataList(json:JsValue):List[Map[String,String]] = {
+    println("neoJsonToDataList")
+    // println(json)
+    val list = (json \ "data").as[List[List[String]]]
+    // println(list)
+    val cols = (json \ "columns").as[List[String]]
+    println(cols)
+    list.map{
+      inner =>
+        cols.zip(inner).toMap[String,String]
+    }
+  }
+
+  def neoJsonToDataMap(json:JsValue):List[Map[String,Option[String]]] = {
     println("neoJsonToDataMap")
     //println(json)
     val data = (json \ "data").apply(0).as[List[JsObject]]
     data.map{
       jobj =>
         (jobj \ "data").as[JsObject].value.map{
-          case (k,v) => (k,v.as[String])
+          case (k,v) =>
+            (k,v.asOpt[String])
         }.toMap
     }.toList
   }
